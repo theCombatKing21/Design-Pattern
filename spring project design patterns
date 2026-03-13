@@ -1,0 +1,9 @@
+Since you're building an Expense Tracker with Spring Boot, the most practical patterns you can apply are:
+
+Strategy → payment methods
+
+Factory → transaction creation
+
+Builder → request objects
+
+Observer → notification service
