@@ -1,0 +1,189 @@
+🧠 Factory Pattern — Final Notes
+✅ Definition
+
+Factory Pattern centralizes object creation and returns objects via a common interface instead of creating them directly using new.
+
+🎯 Why we use it
+
+Without Factory:
+
+Payment payment = new UpiPayment(); // tightly coupled ❌
+
+Problems:
+
+Client knows concrete class
+
+Hard to extend
+
+Switch/if logic spreads everywhere
+
+With Factory:
+
+Payment payment = PaymentFactory.getPayment("UPI");
+
+✔ Client depends on interface, not implementation
+✔ Object creation is centralized
+✔ Cleaner and scalable design
+
+🧱 1️⃣ Basic Factory (Simple Factory)
+Interface
+interface Payment {
+    void pay();
+}
+Implementations
+class UpiPayment implements Payment {
+    public void pay() {
+        System.out.println("UPI Payment");
+    }
+}
+
+class CardPayment implements Payment {
+    public void pay() {
+        System.out.println("Card Payment");
+    }
+}
+Factory (with if/switch)
+class PaymentFactory {
+
+    public static Payment getPayment(String type) {
+
+        if(type.equalsIgnoreCase("UPI"))
+            return new UpiPayment();
+
+        else if(type.equalsIgnoreCase("CARD"))
+            return new CardPayment();
+
+        throw new IllegalArgumentException("Invalid type");
+    }
+}
+Usage
+Payment payment = PaymentFactory.getPayment("UPI");
+payment.pay();
+⚠️ Key Insight
+
+Factory does NOT remove logic — it moves it to one place
+
+🧠 2️⃣ Improved Factory (Registry / Map-Based)
+
+Removes if/switch from factory.
+
+import java.util.*;
+import java.util.function.Supplier;
+
+class PaymentFactory {
+
+    private static final Map<String, Supplier<Payment>> registry = new HashMap<>();
+
+    static {
+        registry.put("UPI", UpiPayment::new);
+        registry.put("CARD", CardPayment::new);
+    }
+
+    public static Payment getPayment(String type) {
+        Supplier<Payment> supplier = registry.get(type);
+
+        if(supplier == null)
+            throw new IllegalArgumentException("Invalid type");
+
+        return supplier.get();
+    }
+}
+
+✔ No switch
+✔ Easily extensible
+✔ Better OCP support
+
+🏭 3️⃣ Factory Method Pattern (No switch inside factory)
+Factory Interface
+interface PaymentFactory {
+    Payment createPayment();
+}
+Concrete Factories
+class UpiPaymentFactory implements PaymentFactory {
+    public Payment createPayment() {
+        return new UpiPayment();
+    }
+}
+
+class CardPaymentFactory implements PaymentFactory {
+    public Payment createPayment() {
+        return new CardPayment();
+    }
+}
+Usage
+PaymentFactory factory = new UpiPaymentFactory();
+Payment payment = factory.createPayment();
+payment.pay();
+⚠️ Important Truth
+
+Switch is not removed — it is shifted outside
+
+Example:
+
+PaymentFactory factory = FactoryProvider.getFactory("UPI");
+🔄 Factory Provider (runtime decision)
+class FactoryProvider {
+
+    private static final Map<String, PaymentFactory> factories = new HashMap<>();
+
+    static {
+        factories.put("UPI", new UpiPaymentFactory());
+        factories.put("CARD", new CardPaymentFactory());
+    }
+
+    public static PaymentFactory getFactory(String type) {
+        return factories.get(type);
+    }
+}
+🧠 Key Concepts (Interview Points)
+1️⃣ Coupling
+
+❌ Before → Client depends on concrete class
+
+✅ After → Client depends on interface
+
+👉 Coupling is reduced and centralized
+
+2️⃣ Open/Closed Principle
+
+❌ Adding new type → modify if/switch
+
+✅ Add new class only → no modification
+
+class NetBankingPayment implements Payment {}
+class NetBankingFactory implements PaymentFactory {}
+3️⃣ Switch/If Statements
+
+❌ Scattered across code
+
+✅ Moved to factory / config / DI
+
+4️⃣ Decision Making
+
+Factory does NOT decide magically
+
+Decision comes from:
+
+Parameter ("UPI")
+
+Config
+
+Registry
+
+Dependency Injection (Spring)
+
+🧩 Real-World Examples
+Spring
+ApplicationContext.getBean("userService");
+JDBC
+DriverManager.getConnection();
+Logging
+LoggerFactory.getLogger();
+🚀 Final Mental Models
+🟡 Simple Factory
+One factory → uses if/switch
+🟢 Factory Method
+Multiple factories → uses polymorphism
+🧾 Final Interview Summary (Write This)
+
+Factory Pattern centralizes object creation and returns objects via a common interface, reducing coupling and improving extensibility. It replaces direct object instantiation with a controlled creation mechanism, often supporting the Open/Closed Principle.
