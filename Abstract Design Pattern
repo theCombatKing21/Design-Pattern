@@ -1,0 +1,126 @@
+🟢 Abstract Factory Pattern — Notes
+✅ Definition
+
+Abstract Factory provides an interface to create families of related objects without specifying their concrete classes.
+
+🎯 Key Idea
+
+Creates multiple related objects together
+
+Ensures they belong to the same family
+
+Hides object creation logic
+
+🧱 Structure
+1️⃣ Abstract Products
+interface Button {
+    void render();
+}
+
+interface TextBox {
+    void render();
+}
+2️⃣ Concrete Products (Family 1)
+class DarkButton implements Button {
+    public void render() {}
+}
+
+class DarkTextBox implements TextBox {
+    public void render() {}
+}
+3️⃣ Concrete Products (Family 2)
+class LightButton implements Button {
+    public void render() {}
+}
+
+class LightTextBox implements TextBox {
+    public void render() {}
+}
+4️⃣ Abstract Factory
+interface UIFactory {
+    Button createButton();
+    TextBox createTextBox();
+}
+5️⃣ Concrete Factories
+class DarkThemeFactory implements UIFactory {
+    public Button createButton() {
+        return new DarkButton();
+    }
+
+    public TextBox createTextBox() {
+        return new DarkTextBox();
+    }
+}
+class LightThemeFactory implements UIFactory {
+    public Button createButton() {
+        return new LightButton();
+    }
+
+    public TextBox createTextBox() {
+        return new LightTextBox();
+    }
+}
+6️⃣ Client
+UIFactory factory = new DarkThemeFactory();
+
+Button b = factory.createButton();
+TextBox t = factory.createTextBox();
+🔥 What it Ensures
+
+✔ Objects are consistent (same family)
+✔ No mixing of incompatible objects
+✔ Easy to switch entire system behavior
+
+🧠 When to Use
+
+When objects must be used together
+
+When you need multiple related objects
+
+When system should support multiple configurations/themes
+
+⚠️ Key Insight
+
+Abstract Factory often uses Factory Method internally (each method creates one product).
+
+🟡 Difference: Factory vs Abstract Factory
+🎯 Core Difference
+Feature	Factory	Abstract Factory
+Creates	One object	Family of objects
+Focus	Which object	Which family
+Methods	Usually 1	Multiple
+Example	Payment	UI Theme
+Complexity	Simple	Higher
+🧠 Example Comparison
+Factory
+Payment payment = PaymentFactory.getPayment("UPI");
+
+👉 Returns one object
+
+Abstract Factory
+UIFactory factory = new DarkThemeFactory();
+
+factory.createButton();
+factory.createTextBox();
+
+👉 Returns multiple related objects
+
+⚡ Conceptual Difference
+Factory
+-------
+Select ONE product
+(UPI or CARD)
+
+
+Abstract Factory
+----------------
+Select FAMILY of products
+(Dark Theme → Button + TextBox)
+🧠 Interview One-Liner
+
+Factory creates a single object based on input, while Abstract Factory creates a family of related objects ensuring consistency across them.
+
+🔑 Memory Trick
+Factory → ONE product
+
+Abstract Factory → MATCHING SET of products
