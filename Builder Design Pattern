@@ -1,0 +1,355 @@
+🟢 Builder Design Pattern — Complete Notes
+🧠 1️⃣ Definition
+
+Builder Pattern is used to construct complex objects step-by-step, providing better readability and flexibility compared to constructors with many parameters.
+
+🎯 2️⃣ Problem It Solves
+❌ Telescoping Constructor Problem
+User user = new User("John", 25, "Bangalore", "123456", true);
+
+Problems:
+
+Hard to read ❌
+
+Order confusion ❌
+
+Optional fields messy ❌
+
+❌ Setters Approach
+User user = new User();
+user.setName("John");
+user.setAge(25);
+
+Problems:
+
+Mutable object ❌
+
+Incomplete state possible ❌
+
+✅ 3️⃣ Builder Solution
+User user = new User.UserBuilder()
+                    .setName("John")
+                    .setAge(25)
+                    .setCity("Bangalore")
+                    .build();
+
+✔ Readable
+✔ Flexible
+✔ Safe
+✔ Supports immutability
+
+🧱 4️⃣ Structure
+Class
+class User {
+
+    private String name;
+    private int age;
+    private String city;
+
+    private User(UserBuilder builder) {
+        this.name = builder.name;
+        this.age = builder.age;
+        this.city = builder.city;
+    }
+Builder Class
+    public static class UserBuilder {
+
+        private String name;
+        private int age;
+        private String city;
+
+        public UserBuilder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public UserBuilder setAge(int age) {
+            this.age = age;
+            return this;
+        }
+
+        public UserBuilder setCity(String city) {
+            this.city = city;
+            return this;
+        }
+
+        public User build() {
+            return new User(this);
+        }
+    }
+}
+🔑 5️⃣ Core Concepts
+✅ 1. Method Chaining
+builder.setName("John").setAge(25).setCity("Bangalore");
+
+👉 Works because:
+
+Each method returns the SAME builder object
+✅ 2. Why return this
+public UserBuilder setName(String name) {
+    this.name = name;
+    return this;
+}
+
+👉 this = current builder object
+
+✔ Enables chaining
+✔ Keeps modifying same object
+
+✅ 3. Step-by-Step Construction
+UserBuilder builder = new UserBuilder();
+
+builder.setName("John");   // step 1
+builder.setAge(25);        // step 2
+builder.setCity("BLR");    // step 3
+
+User user = builder.build(); // final object
+🧠 Internal Flow
+Builder (mutable, keeps updating)
+        ↓
+build()
+        ↓
+Final Object (immutable)
+🎯 6️⃣ Key Insight
+Builder = temporary object storing values
+
+build() = creates final object using those values
+🔥 7️⃣ Advantages
+
+✔ Readable object creation
+✔ No constructor confusion
+✔ Supports optional fields
+✔ Enables immutability
+✔ Flexible (can build conditionally)
+
+⚠️ 8️⃣ When to Use
+
+Use Builder when:
+
+Many fields (especially optional)
+
+Object creation is complex
+
+You want immutable objects
+
+You want clean and readable code
+
+🚫 9️⃣ When NOT to Use
+
+Simple objects (2–3 fields)
+
+No optional fields
+
+No complexity
+
+🧩 🔟 Real-World Usage
+1️⃣ Lombok (VERY COMMON)
+@Builder
+class User {
+    private String name;
+    private int age;
+}
+
+Usage:
+
+User user = User.builder()
+                .name("John")
+                .age(25)
+                .build();
+2️⃣ Java StringBuilder
+StringBuilder sb = new StringBuilder();
+sb.append("Hello").append(" World");
+3️⃣ HTTP Request Builder
+HttpRequest request = HttpRequest.newBuilder()
+                                .uri(...)
+                                .header(...)
+                                .build();
+🧠 1️⃣1️⃣ Interview Questions
+❓ Why not constructor?
+Too many parameters → unreadable
+❓ Why not setters?
+Mutable + inconsistent object
+❓ Why Builder?
+Readable + flexible + immutable
+⚡ 1️⃣2️⃣ Builder vs Constructor
+Feature	Constructor	Builder
+Readability	❌ Poor	✅ Good
+Optional fields	❌ Hard	✅ Easy
+Order dependency	❌ Yes	✅ No
+Immutability	❌ Hard	✅ Easy
+🔥 1️⃣3️⃣ Final Mental Model
+Constructor → all values at once ❌
+
+Builder → step-by-step construction ✅
+🧾 Final Interview One-Liner
+
+Builder Pattern is used to construct complex objects step-by-step, improving readability, flexibility, and enabling immutable object creation.
+
+
+--------------------------------
+Let me start from the problem rather than the solution — that's where most videos fail, they show you the pattern before you feel the pain it solves.
+
+The problem: constructors that get out of hand
+Imagine you're building a Pizza class. A pizza has a lot of optional properties — size, crust, sauce, cheese, and various toppings. The naive approach is a constructor:
+javaPizza pizza = new Pizza("large", "thin", "tomato", "mozzarella", true, false, true, false, true);
+Look at that. What does true, false, true, false, true even mean? You have to go back to the constructor signature to figure out what each boolean represents. This is called the telescoping constructor problem — the more options a class has, the more unreadable and error-prone its construction becomes.
+You might think: "why not just use setters?"
+javaPizza pizza = new Pizza();
+pizza.setSize("large");
+pizza.setCrust("thin");
+pizza.setSauce("tomato");
+// ... and so on
+This looks cleaner, but it has a nasty problem: the object exists in an incomplete, inconsistent state between each set call. What if another thread reads your Pizza object halfway through construction? What if you forget to call setCrust()? There's no way to enforce that the object is fully and correctly built before it's used.
+The Builder pattern solves both problems at once.
+
+The core idea: separate construction from the object itself
+Instead of the object building itself, you hand that job to a separate Builder class. The builder collects all your choices step by step, and only at the very end — when you call build() — does it create the actual Pizza object. Until that moment, nothing half-baked (pun intended) exists.
+Here's what using a builder looks like:
+javaPizza pizza = new Pizza.Builder()
+    .size("large")
+    .crust("thin")
+    .sauce("tomato")
+    .cheese("mozzarella")
+    .pepperoni()
+    .mushrooms()
+    .build();  // only NOW does the Pizza get created
+Compare this to the constructor mess from before. This reads almost like English. You can glance at it and immediately understand what kind of pizza is being made. Notice also that you only specify the toppings you want — you don't have to pass false for every topping you're skipping.
+
+Building it step by step
+Let's build this from scratch so every piece makes sense.
+javapublic class Pizza {
+
+    // These are final — once a Pizza is built, it cannot be changed.
+    // This gives us immutability, which is one of the key benefits.
+    private final String size;
+    private final String crust;
+    private final String sauce;
+    private final String cheese;
+    private final boolean pepperoni;
+    private final boolean mushrooms;
+    private final boolean olives;
+
+    // The Pizza constructor is PRIVATE.
+    // Nobody can call 'new Pizza(...)' directly — the only way
+    // to create a Pizza is through the Builder.
+    private Pizza(Builder builder) {
+        this.size       = builder.size;
+        this.crust      = builder.crust;
+        this.sauce      = builder.sauce;
+        this.cheese     = builder.cheese;
+        this.pepperoni  = builder.pepperoni;
+        this.mushrooms  = builder.mushrooms;
+        this.olives     = builder.olives;
+    }
+
+    // ─── The Builder lives inside Pizza as a static inner class ───
+    public static class Builder {
+
+        // Required fields — must be set
+        private final String size;
+
+        // Optional fields — have sensible defaults
+        private String  crust      = "regular";
+        private String  sauce      = "tomato";
+        private String  cheese     = "mozzarella";
+        private boolean pepperoni  = false;
+        private boolean mushrooms  = false;
+        private boolean olives     = false;
+
+        // The Builder's constructor only takes REQUIRED fields.
+        // Everything else is optional and set via methods below.
+        public Builder(String size) {
+            this.size = size;
+        }
+
+        // Each method sets one property and returns 'this' —
+        // meaning it returns the Builder itself back to you.
+        // This is what enables method chaining (the fluent style).
+        public Builder crust(String crust) {
+            this.crust = crust;
+            return this;  // <-- key: return the builder, not void
+        }
+
+        public Builder sauce(String sauce) {
+            this.sauce = sauce;
+            return this;
+        }
+
+        public Builder cheese(String cheese) {
+            this.cheese = cheese;
+            return this;
+        }
+
+        public Builder pepperoni() {
+            this.pepperoni = true;
+            return this;
+        }
+
+        public Builder mushrooms() {
+            this.mushrooms = true;
+            return this;
+        }
+
+        public Builder olives() {
+            this.olives = true;
+            return this;
+        }
+
+        // build() is the final step.
+        // This is where validation can happen, and where the
+        // actual Pizza object is created and returned.
+        public Pizza build() {
+            // You can add validation here before creating the object
+            if (size == null || size.isEmpty()) {
+                throw new IllegalStateException("Pizza must have a size");
+            }
+            return new Pizza(this);
+        }
+    }
+}
+Now using it:
+java// A fully loaded pizza
+Pizza pizza1 = new Pizza.Builder("large")
+    .crust("thin")
+    .sauce("pesto")
+    .cheese("parmesan")
+    .pepperoni()
+    .olives()
+    .build();
+
+// A minimal pizza — only size is required, everything else uses defaults
+Pizza pizza2 = new Pizza.Builder("medium")
+    .build();
+
+// A vegetarian pizza — you skip pepperoni entirely, no need to write false
+Pizza pizza3 = new Pizza.Builder("small")
+    .mushrooms()
+    .olives()
+    .build();
+
+Why does return this feel like magic?
+This is the part that confuses people in videos, so let's slow down on it. When you write:
+javanew Pizza.Builder("large")
+    .crust("thin")
+    .sauce("pesto")
+    .pepperoni()
+    .build();
+What's actually happening is this — each method call returns the same builder object, so the next method call is being made on that same builder:
+javaBuilder b = new Pizza.Builder("large");  // step 1: create builder
+b = b.crust("thin");                      // step 2: set crust, get builder back
+b = b.sauce("pesto");                     // step 3: set sauce, get builder back
+b = b.pepperoni();                        // step 4: set pepperoni, get builder back
+Pizza p = b.build();                      // step 5: build the pizza
+The chained version is just a more compact way of writing those five lines. Each intermediate builder isn't thrown away — it's the same object accumulating your choices, which is why return this is the crucial ingredient.
+
+The three things Builder gives you
+Readability. The code reads like a description of the object being created. Six months later when you read new Pizza.Builder("large").crust("thin").pepperoni().build(), you instantly understand what's being built. No argument guessing.
+Immutability. Once build() is called, the Pizza fields are all final. Nobody can come along later and change your pizza's crust. This makes your objects safe to share across threads.
+Validation in one place. All the rules about what makes a valid Pizza live inside build(). If size is missing, or if two options conflict, you catch it there — before the object exists, not after.
+
+How is this different from Factory patterns?
+This is a great question to anchor your understanding. The key distinction is what problem each pattern solves:
+Factory is about which type of object to create — given a condition, return one subclass or another. The construction itself is usually simple (just new EmailNotifier()).
+Builder is about how to construct a single complex object — same type every time, but with many optional parameters and a need to ensure the result is valid and complete.
+A real-world analogy: a Factory is like a vending machine — you press a button and get a specific product. A Builder is like ordering a custom sandwich at Subway — same type of product (sandwich) every time, but you walk through a series of choices before the thing is handed to you.
+You can even use them together — an Abstract Factory that decides which Builder implementation to use, and that Builder then handles the complex construction of each product family's objects.
