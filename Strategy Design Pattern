@@ -1,0 +1,314 @@
+🟢 Strategy Pattern — Notes
+🧠 1️⃣ Definition
+
+Strategy Pattern defines a family of algorithms (behaviors), encapsulates each one, and makes them interchangeable at runtime.
+
+🎯 2️⃣ Problem It Solves
+❌ Without Strategy
+class PaymentService {
+
+    public void pay(String type, int amount) {
+
+        if(type.equals("UPI")) {
+            System.out.println("Pay via UPI");
+        }
+        else if(type.equals("CARD")) {
+            System.out.println("Pay via Card");
+        }
+    }
+}
+Problems
+
+Too many if/switch ❌
+
+Hard to extend ❌
+
+Violates Open/Closed Principle ❌
+
+Logic becomes messy ❌
+
+✅ 3️⃣ Strategy Solution
+
+👉 Move each behavior into separate classes
+
+🧱 4️⃣ Structure
+1️⃣ Strategy Interface
+interface PaymentStrategy {
+    void pay(int amount);
+}
+2️⃣ Concrete Strategies
+class UpiPaymentStrategy implements PaymentStrategy {
+    public void pay(int amount) {
+        System.out.println("Paid via UPI");
+    }
+}
+class CardPaymentStrategy implements PaymentStrategy {
+    public void pay(int amount) {
+        System.out.println("Paid via Card");
+    }
+}
+3️⃣ Context (Main Class)
+class PaymentService {
+
+    private PaymentStrategy strategy;
+
+    public PaymentService(PaymentStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void pay(int amount) {
+        strategy.pay(amount);
+    }
+}
+4️⃣ Usage
+PaymentService service = new PaymentService(new UpiPaymentStrategy());
+service.pay(100);
+🔁 5️⃣ Runtime Behavior Change
+PaymentService service = new PaymentService(new CardPaymentStrategy());
+service.pay(200);
+
+👉 Same class, different behavior
+
+🔑 6️⃣ Key Concepts
+✅ 1. Encapsulation of Behavior
+Each algorithm is in its own class
+✅ 2. Runtime Flexibility
+Behavior can change at runtime
+✅ 3. Open/Closed Principle
+Add new strategy → no modification needed
+⚡ 7️⃣ Advantages
+
+✔ Removes if/switch logic
+✔ Clean and maintainable code
+✔ Easy to extend
+✔ Promotes composition over inheritance
+
+🧠 8️⃣ When to Use
+
+Multiple ways to perform a task
+
+Want to avoid large if/switch
+
+Behavior changes at runtime
+
+🚫 9️⃣ When NOT to Use
+
+Only one behavior exists
+
+Simple logic (overkill)
+
+🧩 🔟 Real-World Examples
+
+Payment methods (UPI, Card)
+
+Discount calculation
+
+Sorting strategies
+
+Authentication strategies
+
+⚠️ 1️⃣1️⃣ Common Interview Insight
+
+Strategy is mainly used to eliminate conditional logic (if/switch) by using polymorphism.
+
+🔄 1️⃣2️⃣ Strategy vs Factory
+Feature	Strategy	Factory
+Purpose	Behavior selection	Object creation
+Focus	How to do	What to create
+Runtime change	✅ Yes	❌ No
+🧠 Key Relation
+PaymentStrategy strategy = StrategyFactory.getStrategy("UPI");
+
+👉 Factory can be used to create Strategy
+
+🧾 1️⃣3️⃣ Final Interview Summary
+
+Strategy Pattern encapsulates different behaviors into separate classes and allows selecting them at runtime, eliminating conditional logic and improving extensibility.
+
+🔑 1️⃣4️⃣ Memory Trick
+Strategy → “How to do something”
+Factory → “What to create”
+
+--------------------------------------------------------
+
+Let's start the same way we did with Builder — from the pain, not the pattern.
+
+The problem: behaviour that changes based on conditions
+Imagine you're building a navigation app. You need to calculate a route, but the route calculation is different depending on how the user wants to travel — by car, by walking, or by bicycle. A first instinct looks like this:
+javaclass Navigator {
+    void navigate(String transportMode) {
+        if (transportMode.equals("car")) {
+            // complex car routing logic
+            System.out.println("Navigating by car: use highways...");
+        } else if (transportMode.equals("walk")) {
+            // complex walking logic
+            System.out.println("Navigating on foot: use footpaths...");
+        } else if (transportMode.equals("bike")) {
+            // complex cycling logic
+            System.out.println("Navigating by bike: use cycle lanes...");
+        }
+    }
+}
+This feels fine at first. But now think about what happens when the app grows. You need to add public transit. Then ferries. Then express routes. Then toll-free routes. Each addition means you crack open Navigator, add another else if, and risk breaking the existing logic. The class becomes a large, fragile blob of conditionals. Testing it is painful because you can't test one mode without the entire class being present. And every time any routing algorithm changes, the same file gets edited — by multiple developers, causing conflicts.
+This is the exact problem the Strategy pattern is designed to solve.
+
+The core idea: extract the varying behaviour into its own family
+The insight is simple but powerful: the thing that varies is the algorithm itself. So instead of keeping all algorithms inside one class, you pull each algorithm out into its own separate class, make them all implement a common interface, and then swap them in and out at runtime.
+The Navigator doesn't need to know how to navigate by car. It just needs to know that it has some strategy for navigating, and that strategy has a navigate() method it can call. What that strategy actually does internally is entirely its own business.
+Let's visualise the structure before we write the code.
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+VvisualizeVvisualize show_widgetThere are three roles in the diagram worth understanding clearly before you see the code. The Context (Navigator) is the class the client talks to — it doesn't know which algorithm it's running, it just knows it has some strategy and delegates to it. The Strategy interface (RouteStrategy) is the common contract every algorithm must honour — it defines what a strategy can do, not how it does it. The Concrete strategies are the actual algorithms, each living in its own class, completely independent of one another.
+
+The full code, piece by piece
+java// ─── Step 1: The Strategy interface ──────────────────────────────
+// This is the contract. Every algorithm must implement this.
+// The Context only ever talks to this interface — never to the
+// concrete classes directly.
+interface RouteStrategy {
+    void buildRoute(String start, String end);
+}
+
+
+// ─── Step 2: Concrete strategies ─────────────────────────────────
+// Each algorithm lives in its own class. They are completely
+// independent — changing CarRouteStrategy affects nothing else.
+
+class CarRouteStrategy implements RouteStrategy {
+    @Override
+    public void buildRoute(String start, String end) {
+        System.out.println("Car route from " + start + " to " + end
+            + ": prefer highways, avoid tolls if possible.");
+    }
+}
+
+class WalkRouteStrategy implements RouteStrategy {
+    @Override
+    public void buildRoute(String start, String end) {
+        System.out.println("Walking route from " + start + " to " + end
+            + ": use footpaths, avoid busy roads.");
+    }
+}
+
+class BikeRouteStrategy implements RouteStrategy {
+    @Override
+    public void buildRoute(String start, String end) {
+        System.out.println("Cycling route from " + start + " to " + end
+            + ": prefer cycle lanes, avoid steep hills.");
+    }
+}
+
+
+// ─── Step 3: The Context ──────────────────────────────────────────
+// Navigator holds a reference to a RouteStrategy — just the interface,
+// never the concrete type. It delegates the actual work to that strategy.
+// It has NO if-else, NO switch. It doesn't care which strategy it holds.
+
+class Navigator {
+    // Holds a strategy — type is the interface, not a concrete class
+    private RouteStrategy strategy;
+
+    // Strategy is injected via constructor (or can be set later)
+    public Navigator(RouteStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    // Allows swapping strategy at runtime — this is a key feature
+    public void setStrategy(RouteStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    // The context delegates to the strategy — it just calls the interface method.
+    // It has no idea whether it's calling CarRouteStrategy or BikeRouteStrategy.
+    public void navigate(String start, String end) {
+        strategy.buildRoute(start, end);  // pure delegation
+    }
+}
+
+
+// ─── Step 4: Client code ──────────────────────────────────────────
+public class Main {
+    public static void main(String[] args) {
+
+        // Start with car navigation
+        Navigator navigator = new Navigator(new CarRouteStrategy());
+        navigator.navigate("Home", "Office");
+        // → Car route from Home to Office: prefer highways...
+
+        // User switches to walking mid-session — swap the strategy at runtime
+        navigator.setStrategy(new WalkRouteStrategy());
+        navigator.navigate("Office", "Restaurant");
+        // → Walking route from Office to Restaurant: use footpaths...
+
+        // Switch to bike — same navigator, different behaviour, zero if-else
+        navigator.setStrategy(new BikeRouteStrategy());
+        navigator.navigate("Restaurant", "Park");
+        // → Cycling route from Restaurant to Park: prefer cycle lanes...
+    }
+}
+Notice something important: the Navigator class never changes, no matter how many transport modes you add. Adding a PublicTransitStrategy tomorrow is purely additive — a new file, and one new new call at the composition root. Navigator never even finds out.
+
+The runtime swap — why it matters
+One thing videos often gloss over is that the strategy can change at runtime, not just at startup. In the example above, setStrategy() allows the very same navigator object to behave differently mid-execution. This is what makes the pattern genuinely powerful in real applications.
+Think about a real scenario: a sorting feature in a data dashboard. When data is small, a simple BubbleSortStrategy is fine. When the dataset crosses a threshold, you programmatically swap to MergeSortStrategy — the calling code doesn't change at all, the behaviour just shifts underneath it.
+java// The strategy can even be chosen based on runtime data
+RouteStrategy chosen = userPreferences.wantsEcoRoute()
+    ? new BikeRouteStrategy()
+    : new CarRouteStrategy();
+
+Navigator navigator = new Navigator(chosen);
+This is impossible to do cleanly with if-else chains inside the class — the decision about which algorithm and the execution of the algorithm are completely entangled. Strategy separates them.
+
+Adding a new strategy — OCP in full effect
+Here is what adding public transit support looks like with the Strategy pattern:
+java// New file — that's all. Zero existing files touched.
+class PublicTransitStrategy implements RouteStrategy {
+    @Override
+    public void buildRoute(String start, String end) {
+        System.out.println("Transit route from " + start + " to " + end
+            + ": use metro line 2, transfer at Central, take bus 47.");
+    }
+}
+
+// Usage — one new line at call site
+navigator.setStrategy(new PublicTransitStrategy());
+navigator.navigate("Home", "Airport");
+Compare this to the if-else version, where you'd have to open Navigator, find the right place in a growing conditional block, and hope you don't accidentally break any of the other branches. With Strategy, you never touch existing code at all.
+
+The three things Strategy gives you
+Eliminates conditionals. Every if (mode == "car") in your context class is a sign that a strategy wants to be born. The pattern converts conditionals into polymorphism.
+Independent testability. You can write a unit test for CarRouteStrategy in complete isolation — no need to construct a Navigator, no need to stub out other modes. Each algorithm is a self-contained, independently testable unit.
+Runtime flexibility. Because the strategy is just an interface reference, it can be swapped at any point. This is something inheritance can never give you — you can't change a class's parent at runtime.
+
+A confusion worth addressing: Strategy vs Factory Method
+Since you've just learnt Factory, you might notice both patterns involve an interface and multiple implementations. The distinction is intent:
+Factory is about object creation — it decides which object to instantiate and hides that decision from you. Strategy is about object behaviour — the object already exists, and you're deciding which algorithm it uses. A Factory might actually use Strategy internally (choose which strategy to inject based on config), and that's perfectly natural — the patterns complement each other rather than compete.
+
+A mental exercise before you move on
+Here's a scenario to test whether the pattern has clicked: you're building a payment system. A user can pay by credit card, PayPal, or cryptocurrency. Without writing any code, can you identify: what is the Context, what is the Strategy interface, and what are the concrete strategies? And where would the decision of which strategy to use actually live?
+If you can answer that clearly in your head, the Strategy pattern has landed. It's one of the most frequently asked about patterns in interviews — particularly the question of how it relates to OCP — so it's worth sitting with until it feels completely natural.What does the Strategy interface define?6:02 PMGreat question — and it's actually the perfect thing to slow down on, because the Strategy interface is the heart of the entire pattern. If this piece is clear, everything else falls into place.
+
+What the interface literally contains
+In the navigation example, the Strategy interface looks like this:
+javainterface RouteStrategy {
+    void buildRoute(String start, String end);
+}
+That's it. One method. No implementation, no logic, no if-else — just a method signature that says: "whatever you are, you must be able to accept a start point and an end point, and build a route."
+
+What it means — the contract metaphor
+The best way to think about a Strategy interface is as a contract. When a class says implements RouteStrategy, it is making a legal promise to the rest of the system: "I guarantee I have a buildRoute(start, end) method, and you can call it on me without knowing anything else about me."
+The Navigator (the Context) relies entirely on this promise. It never says if this is a CarRouteStrategy, do this. It just holds a reference typed as RouteStrategy and calls buildRoute(). It trusts the contract, not any specific class.
+This is why the interface is sometimes described as a common language between the context and its strategies — it's the one thing they all agree on, the shared vocabulary that lets them work together without being coupled to each other.
+
+What the interface deliberately leaves out
+This is where most explanations stop too early. The interface doesn't just define what's in it — it's equally important to understand what it consciously omits.
+It says nothing about how the route is built. CarRouteStrategy might query a highway database, calculate fuel costs, and avoid toll roads. WalkRouteStrategy might look up footpath data and prefer shaded routes. BikeRouteStrategy might factor in elevation. All of that complexity is completely hidden behind the interface — the caller doesn't know and doesn't care. This is the principle of encapsulation of behaviour, and the interface is the wall that enforces it.
+
+Why it needs to be narrow
+You might wonder: why does the interface only have one method? Why not put more methods in there?
+The answer is that the interface should only define the behaviour that the Context actually needs to use. The Navigator needs to ask "build me a route" — so that's what goes in the interface. If you started adding getEstimatedTime(), getFuelCost(), getAlternateRoutes() and so on, you'd be forcing every single strategy to implement all of those, even if a WalkRouteStrategy has no concept of fuel cost. The interface would become a burden rather than a clean contract.
+This is actually an expression of a design principle called the Interface Segregation Principle — keep interfaces focused and minimal so that implementors only need to provide what they genuinely offer.
