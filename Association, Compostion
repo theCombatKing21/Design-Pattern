@@ -1,0 +1,178 @@
+🔷 1. Association (The Base Concept)
+👉 What is it?
+
+Association = “uses-a” or “knows-a” relationship
+
+Two classes are related, but no ownership.
+
+🧠 Think:
+
+“They are connected, but can exist independently.”
+
+💡 Example:
+
+A Teacher and Student
+
+A teacher teaches students
+
+A student exists even without a specific teacher
+
+class Student {}
+
+class Teacher {
+    List<Student> students;  // association
+}
+Key Points:
+
+No lifecycle dependency
+
+No ownership
+
+Just a reference
+
+🔷 2. Aggregation (Weak Association)
+👉 What is it?
+
+Aggregation = “has-a” (but weak ownership)
+
+One object contains another, but:
+
+The contained object can exist independently
+
+🧠 Think:
+
+“Whole–part, but parts can live without the whole.”
+
+💡 Example:
+
+A Department has Employees
+
+If department is deleted → employees still exist
+
+class Employee {}
+
+class Department {
+    List<Employee> employees;  // aggregation
+}
+Key Points:
+
+Weak ownership
+
+Lifecycle is independent
+
+Often shared objects
+
+🔷 3. Composition (Strong Association)
+👉 What is it?
+
+Composition = “owns-a” (strong ownership)
+
+One object completely owns another.
+
+🧠 Think:
+
+“If the whole dies, the part dies.”
+
+💡 Example:
+
+A House has Rooms
+
+If house is destroyed → rooms are gone
+
+class Room {}
+
+class House {
+    private List<Room> rooms = new ArrayList<>();
+
+    House() {
+        rooms.add(new Room()); // created inside
+    }
+}
+Key Points:
+
+Strong ownership
+
+Lifecycle tied together
+
+No sharing
+
+Usually created inside parent
+
+🔥 The Ultimate Comparison (This is what you remember)
+Concept	Relationship	Ownership	Lifecycle	Example
+Association	uses-a	❌ None	Independent	Teacher–Student
+Aggregation	has-a	⚠️ Weak	Independent	Department–Employee
+Composition	owns-a	✅ Strong	Dependent	House–Room
+🧠 Golden Memory Trick (Never Forget This)
+
+Think of 3 levels of attachment:
+
+1️⃣ Association → “I know you”
+
+Casual connection
+
+2️⃣ Aggregation → “I have you”
+
+But you can leave anytime
+
+3️⃣ Composition → “You are part of me”
+
+You cannot exist without me
+
+🔥 Interview-Level Insight (VERY IMPORTANT)
+
+Most people fail here 👇
+
+❗ Java DOES NOT enforce aggregation vs composition
+
+Java only has references.
+
+👉 The difference is:
+
+How you design
+
+Who creates the object
+
+Who controls lifecycle
+
+✔️ This is Aggregation:
+class Department {
+    List<Employee> employees;
+
+    Department(List<Employee> employees) {
+        this.employees = employees; // passed from outside
+    }
+}
+
+👉 Employees created outside → weak relationship
+
+✔️ This is Composition:
+class House {
+    private List<Room> rooms;
+
+    House() {
+        rooms = new ArrayList<>();
+        rooms.add(new Room()); // created internally
+    }
+}
+
+👉 Rooms created inside → strong ownership
+
+⚠️ Common Mistake
+
+❌ “If I use new, it's composition”
+
+👉 Not always.
+
+What matters:
+
+Can object exist outside?
+
+Is it shared?
+
+Who controls lifecycle?
+
+🧠 Final Mental Model (Burn this in)
+Association  → Just linked
+Aggregation  → Contains (loosely)
+Composition  → Owns (tightly)
