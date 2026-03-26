@@ -1,0 +1,172 @@
+🟢 1️⃣ Definition
+
+Decorator Pattern allows you to add new behavior to an object dynamically without modifying its class.
+
+🎯 Core Idea
+Instead of:
+Changing class ❌
+
+Do:
+Wrap object → add behavior ✅
+🧠 2️⃣ Real-Life Analogy
+☕ Coffee Shop
+
+Base coffee:
+
+Simple Coffee
+
+Add-ons:
+
++ Milk
++ Sugar
++ Whipped Cream
+
+👉 You don’t create:
+
+MilkCoffee
+SugarCoffee
+MilkSugarCoffee
+
+❌ That would explode into too many classes
+
+👉 Instead:
+
+Wrap coffee with add-ons dynamically ✅
+🔥 3️⃣ Problem It Solves
+❌ Without Decorator (Inheritance explosion)
+Coffee
+ ├── MilkCoffee
+ ├── SugarCoffee
+ ├── MilkSugarCoffee
+ ├── MilkSugarCreamCoffee
+
+👉 Too many combinations ❌
+
+✅ 4️⃣ Decorator Solution
+
+👉 Use composition instead of inheritance
+
+🧱 5️⃣ Structure
+1️⃣ Component Interface
+interface Coffee {
+    int cost();
+}
+2️⃣ Concrete Component
+class SimpleCoffee implements Coffee {
+    public int cost() {
+        return 10;
+    }
+}
+3️⃣ Base Decorator
+abstract class CoffeeDecorator implements Coffee {
+
+    protected Coffee coffee;
+
+    public CoffeeDecorator(Coffee coffee) {
+        this.coffee = coffee;
+    }
+}
+4️⃣ Concrete Decorators
+Milk
+class MilkDecorator extends CoffeeDecorator {
+
+    public MilkDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    public int cost() {
+        return coffee.cost() + 5;
+    }
+}
+Sugar
+class SugarDecorator extends CoffeeDecorator {
+
+    public SugarDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    public int cost() {
+        return coffee.cost() + 3;
+    }
+}
+5️⃣ Usage
+Coffee coffee = new SimpleCoffee();
+
+coffee = new MilkDecorator(coffee);
+coffee = new SugarDecorator(coffee);
+
+System.out.println(coffee.cost()); // 10 + 5 + 3 = 18
+🔥 What Happened?
+SimpleCoffee
+    ↓ wrapped by Milk
+    ↓ wrapped by Sugar
+
+👉 Each decorator adds behavior
+
+🧠 6️⃣ Step-by-Step Flow
+1. Create base object
+2. Wrap with decorator
+3. Each decorator adds functionality
+4. Final result accumulates behavior
+🎯 Key Insight
+
+Decorator wraps the object and adds behavior before/after delegating to it
+
+🧩 7️⃣ Visual Representation
+SugarDecorator
+    ↓
+MilkDecorator
+    ↓
+SimpleCoffee
+⚡ 8️⃣ Why This Is Powerful
+
+✔ No class explosion
+✔ Add features dynamically
+✔ Follows Open/Closed Principle
+✔ Flexible combinations
+
+🧠 9️⃣ When to Use
+
+✔ Add features dynamically
+✔ Avoid subclass explosion
+✔ Extend behavior without modifying class
+
+🚫 🔟 When NOT to Use
+
+Simple logic
+
+No need for dynamic behavior
+
+Too many small decorators (overkill)
+
+🧩 1️⃣1️⃣ Real-World Examples
+1️⃣ Java IO Streams (VERY IMPORTANT)
+BufferedReader br = new BufferedReader(new FileReader("file.txt"));
+
+👉 BufferedReader wraps FileReader
+
+2️⃣ Spring Framework
+
+Filters
+
+Interceptors
+
+3️⃣ Logging frameworks
+
+Add timestamp, formatting dynamically
+
+🔄 1️⃣2️⃣ Decorator vs Adapter
+Feature	Decorator	Adapter
+Purpose	Add behavior	Convert interface
+Changes interface?	❌ No	✅ Yes
+Focus	Enhancement	Compatibility
+🔄 1️⃣3️⃣ Decorator vs Strategy
+Feature	Decorator	Strategy
+Purpose	Add features	Change behavior
+Relationship	Wrap object	Replace algorithm
+🧾 1️⃣4️⃣ Final Interview Summary
+
+Decorator Pattern allows adding new behavior to an object dynamically by wrapping it, avoiding subclass explosion and promoting flexible design.
+
+🔑 1️⃣5️⃣ Memory Trick
+Decorator → “Wrap and add features”
