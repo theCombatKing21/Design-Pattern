@@ -1,0 +1,135 @@
+================ CREATIONAL (Object Creation) ================
+
+1. Singleton
+→ One object only
+→ Example: Logger, Config
+→ Think: “Only one instance needed”
+
+--------------------------------------------------------------
+
+2. Factory
+→ Creates ONE object based on input
+→ Hides creation logic
+→ Think: “Which object to create?”
+
+Example:
+Payment p = Factory.get("UPI");
+
+--------------------------------------------------------------
+
+3. Abstract Factory
+→ Creates FAMILY of related objects
+→ Ensures compatibility
+
+Example:
+UIFactory → Button + TextBox (same theme)
+
+→ Think: “Give me a matching set”
+
+--------------------------------------------------------------
+
+4. Builder
+→ Step-by-step object creation
+→ Handles many optional fields
+
+Example:
+User.builder().name().age().build()
+
+→ Think: “Complex object → build step-by-step”
+
+==============================================================
+
+
+
+================ BEHAVIORAL (Behavior Logic) ==================
+
+5. Strategy ⭐
+→ Different behaviors/algorithms
+→ Replace if-else
+
+Example:
+UPI / CARD payment logic
+
+→ Think: “HOW to do something?”
+
+--------------------------------------------------------------
+
+6. Observer ⭐
+→ One-to-many notification
+→ Event system
+
+Example:
+YouTube subscribers
+
+→ Think: “Notify everyone when something changes”
+
+--------------------------------------------------------------
+
+7. State ⭐
+→ Behavior changes based on state
+→ Removes state-based if-else
+
+Example:
+ATM (NoCard → HasCard → Withdraw)
+
+→ Think: “Behavior depends on current state”
+
+==============================================================
+
+
+
+================ STRUCTURAL (Class Structure) =================
+
+8. Adapter
+→ Makes incompatible interfaces work together
+
+Example:
+Old API → New interface
+
+→ Think: “Convert interface”
+
+--------------------------------------------------------------
+
+9. Decorator ⭐
+→ Add features dynamically (wrap object)
+
+Example:
+Coffee + milk + sugar
+
+→ Think: “Wrap and add behavior”
+
+==============================================================
+
+
+🧠 HOW TO RECALL DURING INTERVIEW (VERY IMPORTANT)
+
+When solving a problem, think like this:
+
+❓ Too many if-else for logic?
+→ Strategy
+
+❓ Object behavior changing with state?
+→ State
+
+❓ Need to notify multiple systems?
+→ Observer
+
+❓ Object creation messy?
+→ Factory / Builder
+
+❓ Need to extend behavior dynamically?
+→ Decorator
+
+❓ Integrating incompatible systems?
+→ Adapter
+
+❓ Need matching set of objects?
+→ Abstract Factory
+🎯 FINAL 5-SECOND RECALL TRICK
+Factory → WHAT to create  
+Strategy → HOW to do  
+State → WHEN behavior changes  
+Observer → WHO to notify  
+Decorator → ADD behavior  
+Adapter → MAKE compatible  
+Builder → BUILD step-by-step  
