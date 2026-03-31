@@ -1,0 +1,17 @@
+public interface PaymentStrategy {
+    void pay(double amount); // amount calculated before calling this
+}
+
+public class CashPayment implements PaymentStrategy {
+    @Override
+    public void pay(double amount) {
+        System.out.println("Paid Rs." + amount + " in cash.");
+    }
+}
+
+public class CardPayment implements PaymentStrategy {
+    @Override
+    public void pay(double amount) {
+        System.out.println("Paid Rs." + amount + " by card.");
+    }
+}
