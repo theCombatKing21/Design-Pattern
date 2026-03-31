@@ -1,0 +1,24 @@
+package ParkingLotSystem;
+
+abstract class Vehicle {
+    String vehicleNo;
+    String vehicleType;
+
+    public Vehicle(String vehicleNo, String vehicleType) {
+        this.vehicleNo = vehicleNo;
+        this.vehicleType = vehicleType;
+    }
+}
+
+
+public class Car extends Vehicle {
+    public Car(String vehicleNo) {
+        super(vehicleNo, "CAR"); // Car always knows it's a CAR
+    }
+}
+
+public class Bike extends Vehicle {
+    public Bike(String vehicleNo) {
+        super(vehicleNo, "BIKE");
+    }
+}
