@@ -1,0 +1,54 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class ParkingLotController {
+    String address;
+    List<Floor> floors;
+    List<Ticket> activeTickets; // track issued tickets
+
+    public ParkingLotController(String address) {
+        this.address = address;
+        this.floors = new ArrayList<>();
+        this.activeTickets = new ArrayList<>();
+    }
+
+    void addFloor(Floor floor) {
+        floors.add(floor);
+    }
+
+    // Ask each floor to find a slot — controller doesn't touch slots directly
+    Ticket issueTicket(Vehicle vehicle) {
+        for (Floor floor : floors) {
+            ParkingSlot slot = floor.findAvailableSlot(vehicle); // delegate to floor
+            if (slot != null) {
+                slot.parkVehicle(vehicle);
+                Ticket ticket = new Ticket(vehicle, slot); // slot stored in ticket
+                activeTickets.add(ticket);
+                System.out.println("Ticket issued: " + ticket.ticketId
+                    + " | Slot: " + slot.slotId);
+                return ticket;
+            }
+        }
+        System.out.println("No available slot for " + vehicle.vehicleType);
+        return null;
+    }
+
+    // Exit flow: take the ticket (has the slot info), calculate fee, pay
+    boolean processExit(Ticket ticket, PaymentStrategy paymentStrategy) {
+        double fee = calculateFee(ticket);
+        System.out.println("Fee: Rs." + fee);
+        paymentStrategy.pay(fee);
+        ticket.slot.unparkVehicle(); // free the slot using ticket's reference
+        activeTickets.remove(ticket);
+        System.out.println("Slot " + ticket.slot.slotId + " is now free.");
+        return true;
+    }
+
+    // Fee calculation: Rs.20 per hour, partial hours rounded up
+    private double calculateFee(Ticket ticket) {
+        long minutes = java.time.Duration.between(
+            ticket.entryTime, java.time.LocalDateTime.now()).toMinutes();
+        long hours = (minutes / 60) + (minutes % 60 > 0 ? 1 : 0);
+        return Math.max(1, hours) * 20.0; // minimum 1 hour charge
+    }
+}
