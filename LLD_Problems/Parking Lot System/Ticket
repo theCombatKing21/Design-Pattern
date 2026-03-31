@@ -1,0 +1,16 @@
+import java.time.LocalDateTime;
+
+public class Ticket {
+    private static int counter = 0;
+    String ticketId;
+    Vehicle vehicle;
+    ParkingSlot slot;           // ← must remember which slot
+    LocalDateTime entryTime;    // ← time, not String
+
+    public Ticket(Vehicle vehicle, ParkingSlot slot) {
+        this.ticketId = "TKT-" + (++counter);
+        this.vehicle = vehicle;
+        this.slot = slot;
+        this.entryTime = LocalDateTime.now(); // always "right now"
+    }
+}
