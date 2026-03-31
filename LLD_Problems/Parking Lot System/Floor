@@ -1,0 +1,26 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Floor {
+    int floorNo;
+    List<ParkingSlot> slots;
+
+    public Floor(int floorNo) {
+        this.floorNo = floorNo;
+        this.slots = new ArrayList<>(); // starts empty
+    }
+
+    void addSlot(ParkingSlot slot) {
+        slots.add(slot);
+    }
+
+    // Vehicle comes in as parameter — floor searches its OWN list
+    ParkingSlot findAvailableSlot(Vehicle vehicle) {
+        for (ParkingSlot slot : slots) {
+            if (slot.isAvailable && slot.canFit(vehicle)) {
+                return slot; // found one, return it
+            }
+        }
+        return null; // no slot found on this floor
+    }
+}
