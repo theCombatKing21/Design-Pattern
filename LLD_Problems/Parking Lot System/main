@@ -1,0 +1,47 @@
+package ParkingLotSystem;
+
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+
+        // 1. Create the parking lot controller
+        ParkingLotController controller = new ParkingLotController("MG Road, Bengaluru");
+
+        // 2. Build Floor 1 with slots
+        Floor floor1 = new Floor(1);
+        floor1.addSlot(new ParkingSlot("F1-S1", "SMALL"));  // for bikes
+        floor1.addSlot(new ParkingSlot("F1-S2", "MEDIUM")); // for cars
+        floor1.addSlot(new ParkingSlot("F1-S3", "MEDIUM"));
+
+        // 3. Build Floor 2 with slots
+        Floor floor2 = new Floor(2);
+        floor2.addSlot(new ParkingSlot("F2-S1", "SMALL"));
+        floor2.addSlot(new ParkingSlot("F2-S2", "MEDIUM"));
+
+        controller.addFloor(floor1);
+        controller.addFloor(floor2);
+
+        // 4. Vehicles arrive
+        Vehicle car1  = new Car("KA-01-AB-1234");
+        Vehicle bike1 = new Bike("KA-05-ZZ-9999");
+
+        System.out.println("--- Vehicles Arriving ---");
+        Ticket carTicket  = controller.issueTicket(car1);
+        Ticket bikeTicket = controller.issueTicket(bike1);
+
+        // 5. Simulate some time passing (1 second, fee rounds up to 1 hour)
+        Thread.sleep(1000);
+
+        // 6. Vehicles exit with different payment methods
+        System.out.println("\n--- Vehicles Exiting ---");
+        if (carTicket != null)
+            controller.processExit(carTicket, new CashPayment());
+
+        if (bikeTicket != null)
+            controller.processExit(bikeTicket, new CardPayment());
+
+        // 7. Verify slots are freed
+        System.out.println("\n--- Slot Status After Exit ---");
+        System.out.println("F1-S2 available: " + floor1.slots.get(1).isAvailable);
+        System.out.println("F1-S1 available: " + floor1.slots.get(0).isAvailable);
+    }
+}
