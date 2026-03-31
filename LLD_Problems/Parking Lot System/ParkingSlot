@@ -1,0 +1,31 @@
+public class ParkingSlot {
+    String slotId;
+    String slotType;      // "SMALL" for bikes, "MEDIUM" for cars
+    boolean isAvailable;
+    Vehicle parkedVehicle; // null when empty
+
+    public ParkingSlot(String slotId, String slotType) {
+        this.slotId = slotId;
+        this.slotType = slotType;
+        this.isAvailable = true;      // born empty
+        this.parkedVehicle = null;
+    }
+
+    // The slot decides if it can accept a vehicle — this is its own responsibility
+    boolean canFit(Vehicle vehicle) {
+        if (vehicle.vehicleType.equals("BIKE")) return true; // bikes fit anywhere
+        if (vehicle.vehicleType.equals("CAR"))
+            return slotType.equals("MEDIUM") || slotType.equals("LARGE");
+        return false;
+    }
+
+    void parkVehicle(Vehicle vehicle) {
+        this.parkedVehicle = vehicle;
+        this.isAvailable = false;
+    }
+
+    void unparkVehicle() {
+        this.parkedVehicle = null;
+        this.isAvailable = true;  // ← you had false here, which is the bug
+    }
+}
