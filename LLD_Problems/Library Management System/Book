@@ -1,0 +1,23 @@
+package LibraryManagementSystem;
+
+// Book is a CONCRETE class — not abstract.
+// Every Book object is one physical copy on the shelf.
+// Two copies of "Harry Potter" = two separate Book objects
+// with different bookIds but same bookName.
+//
+// It has NO methods — it is a pure data holder.
+// It does not borrow itself, it does not know who has it.
+// Other classes (BorrowRecord, LibraryController) USE the Book object.
+
+public class Book {
+
+    String bookId;    // unique per physical copy: "B001", "B002"
+    String bookName;  // same across copies: "Harry Potter"
+
+    // Constructor: a Book cannot exist without an id and a name.
+    // No vehicle-in-ParkingSlot mistake here — Book starts with no owner.
+    public Book(String bookId, String bookName) {
+        this.bookId = bookId;
+        this.bookName = bookName;
+    }
+}
