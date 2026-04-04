@@ -1,0 +1,41 @@
+package LibraryManagementSystem;
+
+import java.time.LocalDate;
+
+// BorrowRecord = the "Ticket" of this system.
+// Issued when a book is borrowed. Used when returning to calculate fine.
+//
+// It stores OBJECT REFERENCES, not just IDs.
+// WHY? Because on return, you need the actual Book object
+// to put back into inventory, and the actual dueDate to calculate fine.
+// Storing just IDs means you'd have to search for them again — wasteful.
+//
+// Chain example from this class:
+//   record.borrowedBook         → the Book object stored inside this record
+//   record.borrowedBook.bookName → go inside that Book, get its name field
+//   record.customer.customerName → go inside Customer, get its name field
+
+public class BorrowRecord {
+
+    // static counter — shared across ALL BorrowRecord objects.
+    // If it were non-static, every new record would reset to 0
+    // and borrowId would always be "BR-1". static fixes this.
+    private static int counter = 0;
+
+    String borrowId;
+    Customer customer;       // who borrowed — object reference, not just ID
+    Book borrowedBook;        // which book — object reference, not just ID
+    LocalDate borrowDate;     // set automatically at creation — always "now"
+    LocalDate dueDate;        // borrowDate + 14 days — needed to calculate fine
+
+    // Constructor only takes what it NEEDS at creation time.
+    // borrowDate and dueDate are computed here — not passed from outside.
+    // WHY? Because borrow always happens "right now". No one should pass a date in.
+    public BorrowRecord(Customer customer, Book borrowedBook) {
+        this.borrowId = "BR-" + (++counter);   // static counter increments globally
+        this.customer = customer;
+        this.borrowedBook = borrowedBook;
+        this.borrowDate = LocalDate.now();
+        this.dueDate = borrowDate.plusDays(14); // 14 day return window
+    }
+}
