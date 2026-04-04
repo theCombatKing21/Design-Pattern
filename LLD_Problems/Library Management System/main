@@ -1,0 +1,56 @@
+package LibraryManagementSystem;
+
+public class Main {
+    public static void main(String[] args) {
+
+        // ── Step 1: Create the controller (the brain) ──────────────────
+        // No parameters needed — it starts with empty maps.
+        // Everything else is built on top of it.
+        LibraryController controller = new LibraryController();
+
+        // ── Step 2: Create librarian, inject controller ─────────────────
+        // Librarian needs controller to add/remove books.
+        // This is WHY controller is injected — librarian calls controller.addBook()
+        Librarian librarian = new Librarian("L001", "Meera", controller);
+
+        // ── Step 3: Librarian adds books to the system ──────────────────
+        // Two physical copies of Harry Potter, one of Clean Code.
+        // librarian.addBook() → calls controller.addBook() internally.
+        librarian.addBook(new Book("B001", "Harry Potter"));
+        librarian.addBook(new Book("B002", "Harry Potter")); // second copy
+        librarian.addBook(new Book("B003", "Clean Code"));
+
+        // ── Step 4: Customers arrive ────────────────────────────────────
+        // Customer is just a data object — no controller needed inside it.
+        // The controller receives customers as METHOD PARAMETERS, not as fields.
+        Customer arjun = new Customer("C001", "Arjun");
+        Customer priya = new Customer("C002", "Priya");
+        Customer rahul = new Customer("C003", "Rahul");
+
+        // ── Step 5: Issue books ─────────────────────────────────────────
+        // controller.issueBook(customer, bookName)
+        //   → searches inventory
+        //   → removes one copy from shelf
+        //   → creates and returns a BorrowRecord
+        System.out.println("\n── Issuing Books ──");
+        BorrowRecord r1 = controller.issueBook(arjun, "Harry Potter"); // gets B001
+        BorrowRecord r2 = controller.issueBook(priya, "Harry Potter"); // gets B002
+        BorrowRecord r3 = controller.issueBook(rahul, "Harry Potter"); // no copy left!
+
+        // ── Step 6: Return books ────────────────────────────────────────
+        // returnBook(record, paymentStrategy)
+        // record has everything: the book object, dueDate, customer.
+        // paymentStrategy decides HOW fine is paid — Strategy Pattern.
+        System.out.println("\n── Returning Books ──");
+        if (r1 != null) controller.returnBook(r1, new CashPayment()); // on time
+        if (r2 != null) controller.returnBook(r2, new CardPayment()); // on time
+
+        // ── Step 7: Verify inventory restored ──────────────────────────
+        // After returning, Harry Potter should have 2 copies available again.
+        System.out.println("\n── Inventory Check ──");
+        System.out.println("Harry Potter copies: "
+            + controller.bookCount.get("Harry Potter")); // should print 2
+        System.out.println("Clean Code copies:   "
+            + controller.bookCount.get("Clean Code"));   // should print 1
+    }
+}
