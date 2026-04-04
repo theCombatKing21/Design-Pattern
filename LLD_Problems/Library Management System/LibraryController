@@ -1,0 +1,145 @@
+package LibraryManagementSystem;
+
+import java.time.LocalDate;
+import java.util.*;
+
+// LibraryController is the brain of the system.
+// It owns all data structures and orchestrates all operations.
+// Customer and Librarian talk TO it — it talks DOWN to Book objects.
+//
+// It holds THREE maps:
+//
+// 1. bookInventory: bookName → List of available Book objects
+//    "Harry Potter" → [Book(B001), Book(B002)]
+//    Used to: find and hand out a physical copy, and receive it back on return.
+//
+// 2. bookCount: bookName → number of available copies
+//    "Harry Potter" → 2
+//    Used to: quickly check availability without counting the list every time.
+//
+// 3. activeBorrows: borrowId → BorrowRecord
+//    "BR-1" → BorrowRecord(...)
+//    Used to: look up a record on return using just the borrowId.
+
+public class LibraryController {
+
+    // bookName → list of physical copies currently on shelf
+    Map<String, List<Book>> bookInventory;
+
+    // bookName → count of available copies (mirrors bookInventory size)
+    Map<String, Integer> bookCount;
+
+    // borrowId → active BorrowRecord (removed when book returned)
+    Map<String, BorrowRecord> activeBorrows;
+
+    public LibraryController() {
+        // All maps start empty — books added via addBook()
+        this.bookInventory = new HashMap<>();
+        this.bookCount     = new HashMap<>();
+        this.activeBorrows = new HashMap<>();
+    }
+
+    // Called by Librarian.addBook() — adds one physical copy to inventory.
+    //
+    // getOrDefault: if "Harry Potter" already has a list, get it.
+    //               if not, start a fresh new ArrayList.
+    // This avoids NullPointerException when adding the first copy of a title.
+    void addBook(Book book) {
+        // Step 1: get existing list for this title, or create new one
+        List<Book> copies = bookInventory.getOrDefault(book.bookName, new ArrayList<>());
+        copies.add(book);  // add this physical copy
+        bookInventory.put(book.bookName, copies); // save back into map
+
+        // Step 2: update count — getOrDefault(key, 0) gives 0 if first copy
+        bookCount.put(book.bookName, bookCount.getOrDefault(book.bookName, 0) + 1);
+
+        System.out.println("Added: " + book.bookId + " (" + book.bookName + ")");
+    }
+
+    // Called by Librarian.removeBook() — removes a physical copy from inventory.
+    void removeBook(Book book) {
+        if (!bookInventory.containsKey(book.bookName)) {
+            System.out.println("Book not found: " + book.bookName);
+            return;
+        }
+        bookInventory.get(book.bookName).remove(book); // remove this copy
+        bookCount.put(book.bookName, bookCount.get(book.bookName) - 1);
+        System.out.println("Removed: " + book.bookId);
+    }
+
+    // Check availability and return one physical Book object.
+    // Returns null if no copies available.
+    //
+    // bookCount.get(bookName) == 0 means all copies are borrowed out.
+    // bookInventory.get(bookName).get(0) gets the FIRST copy from the list.
+    // We don't remove it here — issueBook() does that.
+    Book searchBook(String bookName) {
+        if (!bookCount.containsKey(bookName) || bookCount.get(bookName) == 0) {
+            System.out.println("Not available: " + bookName);
+            return null;
+        }
+        // .get(bookName) → returns List<Book>
+        // .get(0)        → returns first Book in that list
+        return bookInventory.get(bookName).get(0);
+    }
+
+    // Full borrow flow:
+    // 1. Search for an available copy
+    // 2. Remove it from inventory (it's no longer on the shelf)
+    // 3. Decrement count
+    // 4. Create BorrowRecord linking customer + book
+    // 5. Store record in activeBorrows for later lookup
+    BorrowRecord issueBook(Customer customer, String bookName) {
+        Book book = searchBook(bookName);
+        if (book == null) return null; // not available
+
+        // Remove from shelf — bookInventory.get(bookName) gives List<Book>
+        //                    .remove(book) removes this specific Book object
+        bookInventory.get(bookName).remove(book);
+        bookCount.put(bookName, bookCount.get(bookName) - 1);
+
+        // Create record — it stores customer and book objects inside itself
+        BorrowRecord record = new BorrowRecord(customer, book);
+        activeBorrows.put(record.borrowId, record); // track it
+
+        System.out.println("Issued [" + book.bookId + "] to "
+            + customer.customerName    // customer is an object — .customerName gets its field
+            + " | Due: " + record.dueDate);
+        return record;
+    }
+
+    // Full return flow:
+    // 1. Get bookName from the record  ← record.borrowedBook.bookName (chain!)
+    // 2. Put the book back on the shelf
+    // 3. Increment count
+    // 4. Check if returned late → calculate fine
+    // 5. If fine exists → collect payment via strategy
+    // 6. Remove from activeBorrows
+    void returnBook(BorrowRecord record, PaymentStrategy paymentStrategy) {
+
+        // record.borrowedBook       → the Book object stored in this record
+        // record.borrowedBook.bookName → go inside that Book, get its bookName field
+        // This is the chain — follow ownership dot by dot
+        String bookName = record.borrowedBook.bookName;
+
+        // Put book back: bookInventory.get(bookName) → gives List<Book>
+        //               .add(record.borrowedBook)   → adds the book back to that list
+        bookInventory.get(bookName).add(record.borrowedBook);
+        bookCount.put(bookName, bookCount.get(bookName) + 1);
+
+        // Fine calculation: is today AFTER the due date?
+        LocalDate today = LocalDate.now();
+        if (today.isAfter(record.dueDate)) {
+            // record.dueDate.until(today).getDays() = number of days late
+            long daysLate = record.dueDate.until(today).getDays();
+            double fine = daysLate * 10.0; // Rs.10 per day late
+            System.out.println("Late by " + daysLate + " days. Fine: Rs." + fine);
+            paymentStrategy.pay(fine); // Strategy Pattern — controller doesn't care HOW
+        } else {
+            System.out.println("Returned on time. No fine.");
+        }
+
+        activeBorrows.remove(record.borrowId); // close the record
+        System.out.println("Book [" + record.borrowedBook.bookId + "] returned.");
+    }
+}
