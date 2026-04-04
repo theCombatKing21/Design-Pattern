@@ -1,0 +1,30 @@
+package LibraryManagementSystem;
+
+// Strategy Pattern for fine payment.
+// LibraryController doesn't care HOW payment happens.
+// It just calls paymentStrategy.pay(amount).
+// CashPayment and CardPayment each handle their own HOW.
+//
+// pay() takes a double amount — because the controller
+// calculates the fine first, then hands just the number to the strategy.
+// The strategy's only job is to process that amount.
+
+public interface PaymentStrategy {
+    void pay(double amount);
+}
+
+public class CashPayment implements PaymentStrategy {
+    @Override
+    public void pay(double amount) {
+        // In real code: verify cash received, give change, etc.
+        System.out.println("Fine of Rs." + amount + " paid in cash.");
+    }
+}
+
+public class CardPayment implements CardPayment {
+    @Override
+    public void pay(double amount) {
+        // In real code: call payment gateway API
+        System.out.println("Fine of Rs." + amount + " paid by card.");
+    }
+}
