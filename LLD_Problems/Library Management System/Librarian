@@ -1,0 +1,23 @@
+public class Librarian {
+
+    String librarianId;
+    String librarianName;
+    LibraryController controller; // injected — librarian uses the system
+
+    public Librarian(String librarianId, String librarianName, LibraryController controller) {
+        this.librarianId = librarianId;
+        this.librarianName = librarianName;
+        this.controller = controller; // store it — needed for entire lifetime
+    }
+
+    // Librarian doesn't add to their own list.
+    // They tell the controller to do it.
+    // "addBook" here is just the librarian's ACTION — the work is delegated.
+    void addBook(Book book) {
+        controller.addBook(book); // delegate to controller
+    }
+
+    void removeBook(Book book) {
+        controller.removeBook(book); // delegate to controller
+    }
+}
