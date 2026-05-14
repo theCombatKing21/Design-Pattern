@@ -1,0 +1,27 @@
+The 5 SOLID Principles
+-----------------------
+
+S - Single Responsibility Principle (SRP)
+A class should have one, and only one, reason to change.
+In Java: Instead of one Employee class that handles database logic, email notifications, and salary calculations,
+split them into specialized classes like EmployeeRepository, EmailService, and SalaryCalculator.
+
+O - Open/Closed Principle (OCP)
+Software entities should be open for extension but closed for modification.
+In Java: Use interfaces or abstract classes to add new functionality without changing existing code. For example,
+a Discount interface allows you to add BlackFridayDiscount or VipDiscount classes without editing the main Checkout logic.
+
+L - Liskov Substitution Principle (LSP)
+Subclasses should be substitutable for their base classes without breaking the application.
+In Java: A classic violation is a Square class extending a Rectangle class. Since a square forces its width and height to be equal,
+it might break logic that expects to set them independently on a rectangle.
+
+I - Interface Segregation Principle (ISP)
+Clients should not be forced to depend on methods they do not use.
+In Java: Instead of one massive Worker interface with work(), eat(), and sleep(), create smaller, specific interfaces like Workable and Feedable. 
+This prevents a Robot class from being forced to implement an eat() method.
+
+D - Dependency Inversion Principle (DIP)
+High-level modules should depend on abstractions, not on low-level concrete implementations.
+In Java: A Switch class should depend on a Switchable interface rather than a specific LightBulb class.
+This allows the switch to operate anything—a fan, a heater, or a bulb—without modifying the Switch code
