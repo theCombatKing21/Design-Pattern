@@ -1,0 +1,297 @@
+Step 4: Main
+public class Main {
+
+    public static void main(String[] args) {
+
+        PaymentService paymentService =
+                new UpiPaymentService();
+
+        OrderService order =
+                new OrderService(paymentService);
+
+        order.placeOrder(1000);
+    }
+}
+
+Output
+
+Order Placed
+Paid ₹1000 using UPI
+
+Suppose tomorrow customer wants Credit Card.
+
+Main changes.
+
+PaymentService paymentService =
+        new CreditCardPaymentService();
+
+Everything else remains unchanged.
+
+So far, so good.
+
+But what's the problem?
+
+Imagine the company now supports
+
+UPI
+Credit Card
+Debit Card
+PayPal
+Apple Pay
+Google Pay
+Net Banking
+Crypto
+
+Now Main starts looking like
+
+String paymentType = "UPI";
+
+PaymentService paymentService;
+
+if(paymentType.equals("UPI")) {
+
+    paymentService = new UpiPaymentService();
+
+}
+else if(paymentType.equals("CARD")) {
+
+    paymentService = new CreditCardPaymentService();
+
+}
+else if(paymentType.equals("PAYPAL")) {
+
+    paymentService = new PaypalPaymentService();
+
+}
+else if(...)
+
+Imagine 20 payment methods.
+
+Main has become messy.
+
+The object creation logic is spreading.
+
+Stage 2: Introduce Factory
+
+Now let's move only the object creation.
+
+Factory
+public class PaymentFactory {
+
+    public static PaymentService getPaymentService(String paymentType) {
+
+        if(paymentType.equalsIgnoreCase("UPI")) {
+            return new UpiPaymentService();
+        }
+
+        if(paymentType.equalsIgnoreCase("CARD")) {
+            return new CreditCardPaymentService();
+        }
+
+        throw new IllegalArgumentException("Invalid Payment Type");
+    }
+}
+
+Notice:
+
+This class only creates objects.
+
+Nothing else.
+
+OrderService
+
+Exactly the same.
+
+public class OrderService {
+
+    private PaymentService paymentService;
+
+    public OrderService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
+    public void placeOrder(double amount) {
+
+        System.out.println("Order Placed");
+
+        paymentService.pay(amount);
+    }
+}
+
+No changes.
+
+Main
+
+Instead of
+
+PaymentService payment =
+        new UpiPaymentService();
+
+we now write
+
+PaymentService payment =
+        PaymentFactory.getPaymentService("UPI");
+
+OrderService order =
+        new OrderService(payment);
+
+order.placeOrder(1000);
+
+Output
+
+Order Placed
+Paid ₹1000 using UPI
+
+Same output.
+
+Different architecture.
+
+Why is this better?
+
+Earlier
+
+Main
+
+if(type=="UPI")
+    new UpiPaymentService()
+
+else if(type=="CARD")
+    new CreditCardPaymentService()
+
+else...
+
+Main knows everything.
+
+After Factory
+
+Main
+
+↓
+
+PaymentFactory
+
+↓
+
+Creates correct object
+
+Main simply says
+
+Give me a PaymentService.
+
+The factory decides which implementation.
+
+Visual Flow
+
+Without Factory
+
+Main
+ |
+ +----> new UpiPaymentService()
+
+ |
+ +----> new OrderService()
+
+With Factory
+
+Main
+
+ |
+
+PaymentFactory
+
+ |
+
+returns UpiPaymentService
+
+ |
+
+OrderService
+Why is this useful?
+
+Suppose tomorrow
+
+UPI Payment
+
+needs
+
+API Key
+
+↓
+
+Database Connection
+
+↓
+
+Logger
+
+↓
+
+Retry Policy
+
+Object creation becomes complicated.
+
+Without Factory
+
+Everywhere in your application
+
+new UpiPaymentService(apiKey,
+                      logger,
+                      retry,
+                      dbConnection);
+
+Repeated hundreds of times.
+
+With Factory
+
+Only Factory changes.
+
+return new UpiPaymentService(apiKey,
+                             logger,
+                             retry,
+                             dbConnection);
+
+Nobody else knows.
+
+Stage 3: Spring Boot
+
+Now imagine Spring Boot.
+
+Instead of writing
+
+PaymentFactory.getPaymentService("UPI");
+
+Spring creates the object automatically.
+
+@Service
+public class UpiPaymentService implements PaymentService
+
+Then
+
+@Service
+public class OrderService {
+
+    private final PaymentService paymentService;
+
+    public OrderService(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+}
+
+Spring does something conceptually similar to this behind the scenes:
+
+PaymentService payment =
+        new UpiPaymentService();
+
+OrderService order =
+        new OrderService(payment);
+
+except it manages object creation, lifecycle, configuration, and injection for you.
+
+The key realization
+
+Notice what never changed across all three versions:
+
+public class OrderService {
+
+    private PaymentService paymentService;
+}
